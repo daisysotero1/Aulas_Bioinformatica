@@ -92,7 +92,7 @@ conda install bioconda::fastqc
 
 Após a instalação, o FastQC estará disponível para utilização dentro do ambiente `rnaseq`.
 
-## 5. Instalação de todas as ferramentas utilizando um script Bash
+## 5. Instalação de todas as ferramentas utilizando um script Bash (execute neste momento)
 
 Em vez de instalar cada ferramenta individualmente, podemos automatizar todo o processo utilizando um script Bash.
 Um script Bash é um arquivo de texto que contém uma sequência de comandos que serão executados pelo interpretador Bash do Linux.
