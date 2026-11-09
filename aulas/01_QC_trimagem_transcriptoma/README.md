@@ -1,0 +1,348 @@
+# Análise de RNA-seq em *Drosophila melanogaster*
+
+**Análise de qualidade e trimagem em dados de RNA-Seq**
+
+## Objetivo
+
+Esta atividade tem como objetivo realizar uma análise inicial de dados de RNA-seq de *Drosophila melanogaster*, utilizando o sistema WSL Ubuntu.
+
+Ao longo da atividade, serão realizadas as seguintes etapas:
+
+- Download do genoma de referência e do arquivo de anotação;
+- Download de reads de RNA-seq paired-end;
+- Organização dos arquivos e identificação das condições experimentais;
+- Controle de qualidade das reads;
+- Trimagem de adaptadores e reads de baixa qualidade;
+
+## Organização dos diretórios
+
+Todos os arquivos da análise serão organizados em um diretório denominado `rna-seq`.
+
+## 1. Preparação do ambiente
+
+O primeiro passo é abrir o terminal do WSL Ubuntu.
+
+Caso ainda não exista um diretório com seu nome, crie-o (substitua 'Daisy' pelo seu nome):
+
+```bash
+mkdir Daisy
+```
+
+Entre no diretório:
+
+```bash
+cd Daisy
+```
+
+Crie o diretório principal da análise de RNA-seq:
+
+```bash
+mkdir rna-seq
+cd rna-seq
+```
+
+---
+
+## 2. Download dos dados genômicos de referência
+
+O primeiro passo da análise é obter o genoma de referência e seu respectivo arquivo de anotação.
+
+Para isso, criaremos o diretório `0_referencia`.
+
+```bash
+mkdir 0_referencia
+cd 0_referencia
+```
+
+### 2.1. Obtenção do genoma de referência
+
+Os dados de referência serão obtidos no NCBI (National Center for Biotechnology Information).
+
+Acesse:
+
+https://www.ncbi.nlm.nih.gov/datasets/genome/
+
+Pesquise por *Drosophila melanogaster*. O assembly utilizado nesta atividade será:
+
+**GCF_000001215.4 – Release 6 plus ISO1 MT**
+
+Clique na coluna 'assembly'. Na nova página aberta, acesse clicando na opção FTP (perto de download) e localize o arquivo do genoma:
+
+`GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz`
+
+Copie o endereço (link) do arquivo (com botão direito do mouse), volte ao terminal WSL e faça o download utilizando o comando `wget` + endereço do arquivo.
+
+```bash
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/215/GCF_000001215.4_Release_6_plus_ISO1_MT/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz
+```
+
+### 2.2. Obtenção do arquivo de anotação
+
+O arquivo GTF contém informações sobre a localização dos genes, transcritos e outras características genômicas. Da mesma forma, faça o download do arquivo de anotação correspondente ao mesmo assembly:
+
+```bash
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/215/GCF_000001215.4_Release_6_plus_ISO1_MT/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.gtf.gz
+```
+
+Verifique os arquivos baixados:
+
+```bash
+ls -lh
+```
+
+### 2.3. Descompactação dos arquivos
+
+Os arquivos foram baixados no formato `.gz`, que corresponde a arquivos compactados.
+
+Para descompactá-los, utilizaremos o comando `gunzip`:
+
+```bash
+gunzip GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz
+
+gunzip GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.gtf.gz
+```
+
+### 2.4. Renomeação dos arquivos
+
+Os arquivos originais possuem nomes longos, dificultando sua utilização nos comandos das próximas etapas.
+Para facilitar a identificação, utilizaremos nomes mais curtos e informativos. Para isso, usaremos 'mv'.
+O comando `mv` é utilizado para mover ou renomear arquivos. Neste caso, estamos apenas modificando seus nomes.
+
+```bash
+# Renomear o genoma de referência
+mv GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna Dmel_genome.fasta
+
+# Renomear o arquivo de anotação
+mv GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.gtf Dmel_annotation.gtf
+```
+
+### 2.5. Verificação dos arquivos
+
+```bash
+ls -lh
+```
+
+Ao final desta etapa, teremos:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `Dmel_genome.fasta` | Genoma de referência de *Drosophila melanogaster* |
+| `Dmel_annotation.gtf` | Anotação dos genes e suas coordenadas genômicas |
+
+O arquivo `Dmel_genome.fasta` será utilizado para indexação e mapeamento das reads com HISAT2.
+
+O arquivo `Dmel_annotation.gtf` será utilizado posteriormente na contagem de reads por gene com FeatureCounts.
+
+Retorne ao diretório principal:
+
+```bash
+cd ..
+```
+
+---
+
+## 3. Download das reads de RNA-seq
+
+Nesta etapa, serão obtidos os dados de RNA-seq de *Drosophila melanogaster* os quais serão utilizados na análise.
+
+Crie o diretório `1_reads`:
+
+```bash
+mkdir 1_reads
+cd 1_reads
+```
+
+### 3.1. Obtenção dos dados no ENA
+
+Os dados serão obtidos no ENA (European Nucleotide Archive), um banco de dados público que armazena informações de sequenciamento de DNA e RNA.
+Acesse: https://www.ebi.ac.uk/ena/
+
+Pesquise pelo número de acesso do projeto: 
+
+**PRJNA613451**
+
+### 3.2. Descrição do projeto
+
+O estudo utilizou RNA-seq para determinar os perfis transcricionais de moscas inteiras (*whole flies*) criadas em duas condições alimentares:
+
+- Dieta holídica enriquecida com glicose;
+- Dieta holídica não modificada.
+
+Moscas machos da linhagem `w1118`, recém-emergidas, foram mantidas por 20 dias a 25 °C em uma das duas condições alimentares.
+A dieta enriquecida continha 50 g/L de glicose, enquanto a dieta não modificada correspondia à dieta holídica original.
+O transcriptoma de moscas inteiras foi sequenciado, permitindo investigar alterações na expressão gênica associadas ao enriquecimento da dieta com glicose.
+
+### 3.3. Organização experimental
+
+O projeto apresenta seis bibliotecas de RNA-seq, distribuídas em dois grupos experimentais, cada um com três réplicas biológicas.
+
+| Condição experimental | Descrição | Réplicas |
+|---|---|---|
+| Unmodified | Dieta holídica não modificada (controle) | 3 |
+| Glucose | Dieta holídica enriquecida com glicose (tratamento) | 3 |
+
+O sequenciamento foi realizado utilizando a estratégia **paired-end**, na qual cada fragmento de cDNA é sequenciado pelas duas extremidades.
+
+Assim, cada amostra possui dois arquivos FASTQ:
+- R1: reads obtidas da primeira extremidade;
+- R2: reads obtidas da segunda extremidade.
+
+### 3.4. Download das reads
+
+Na página do projeto no ENA:
+
+1. Localize as seis bibliotecas de sequenciamento (SRR).
+2. Selecione todos os arquivos FASTQ correspondentes às bibliotecas.
+3. Clique na opção verde `Get download script`.
+4. Baixe o script disponibilizado pelo ENA.
+5. Salve o arquivo com o nome `SRR.sh`.
+
+### 3.5. Transferência do script para o WSL Ubuntu
+
+Para abrir o diretório atual do terminal no Windows, utilize:
+
+```bash
+explorer.exe .
+```
+
+Copie o arquivo `SRR.sh` para a pasta aberta pelo Windows.
+
+Feche a janela do Explorer e retorne ao terminal do Ubuntu.
+
+Verifique se o arquivo está no diretório correto:
+
+```bash
+ls
+```
+
+Resultado esperado:
+
+```text
+SRR.sh
+```
+
+### 3.6. Verificação do script de download
+
+Para visualizar o conteúdo do script, utilize:
+
+```bash
+cat SRR.sh
+```
+
+O arquivo contém os comandos `wget` necessários para baixar as reads de cada biblioteca.
+
+Exemplo:
+
+```bash
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR113/018/SRR11350618/SRR11350618_1.fastq.gz
+
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR113/018/SRR11350618/SRR11350618_2.fastq.gz
+```
+
+O parâmetro `-nc` (*no-clobber*) evita que arquivos já existentes sejam sobrescritos durante o download.
+
+### 3.7. Execução do script
+
+Para executar o script e iniciar o download das reads, utilize:
+
+```bash
+bash SRR.sh
+```
+
+Aguarde até que todos os arquivos sejam baixados.
+
+Verifique os arquivos obtidos:
+
+```bash
+ls -lh
+```
+
+Os arquivos estarão inicialmente identificados pelos seus códigos de acesso SRR.
+
+---
+
+## 4. Renomeação e organização das reads
+
+Os arquivos FASTQ possuem nomes baseados nos códigos SRR, que não identificam diretamente as condições experimentais.
+
+Para facilitar a organização da análise, os arquivos serão renomeados de acordo com os grupos experimentais.
+
+Utilizaremos as seguintes siglas:
+
+| Sigla | Significado | Condição |
+|---|---|---|
+| CT | Control | Dieta holídica não modificada |
+| GL | Glucose | Dieta holídica enriquecida com glicose |
+
+A identificação das réplicas será realizada utilizando os números `01`, `02` e `03`.
+
+O sufixo `R1` indica a primeira extremidade sequenciada, enquanto `R2` indica a segunda extremidade.
+
+### 4.1. Renomeação das amostras controle
+
+```bash
+# Unmodified - controle
+
+mv SRR11350614_1.fastq.gz CT_01_R1.fastq.gz
+mv SRR11350614_2.fastq.gz CT_01_R2.fastq.gz
+
+mv SRR11350615_1.fastq.gz CT_02_R1.fastq.gz
+mv SRR11350615_2.fastq.gz CT_02_R2.fastq.gz
+
+mv SRR11350616_1.fastq.gz CT_03_R1.fastq.gz
+mv SRR11350616_2.fastq.gz CT_03_R2.fastq.gz
+```
+
+### 4.2. Renomeação das amostras tratadas
+
+```bash
+# Glucose - tratamento
+
+mv SRR11350617_1.fastq.gz GL_01_R1.fastq.gz
+mv SRR11350617_2.fastq.gz GL_01_R2.fastq.gz
+
+mv SRR11350618_1.fastq.gz GL_02_R1.fastq.gz
+mv SRR11350618_2.fastq.gz GL_02_R2.fastq.gz
+
+mv SRR11350619_1.fastq.gz GL_03_R1.fastq.gz
+mv SRR11350619_2.fastq.gz GL_03_R2.fastq.gz
+```
+
+### 4.3. Verificação dos arquivos
+
+```bash
+ls -lh
+```
+
+Ao final, teremos os seguintes arquivos:
+
+| Amostra | R1 | R2 |
+|---|---|---|
+| CT_01 | CT_01_R1.fastq.gz | CT_01_R2.fastq.gz |
+| CT_02 | CT_02_R1.fastq.gz | CT_02_R2.fastq.gz |
+| CT_03 | CT_03_R1.fastq.gz | CT_03_R2.fastq.gz |
+| GL_01 | GL_01_R1.fastq.gz | GL_01_R2.fastq.gz |
+| GL_02 | GL_02_R1.fastq.gz | GL_02_R2.fastq.gz |
+| GL_03 | GL_03_R1.fastq.gz | GL_03_R2.fastq.gz |
+
+A organização dos arquivos facilitará a identificação das amostras nas próximas etapas da análise.
+
+---
+
+## 5. Próximas etapas da análise
+
+Após o download e a organização dos dados, a análise de RNA-seq seguirá as seguintes etapas:
+
+| Etapa | Procedimento | Ferramenta |
+|---|---|---|
+| 1 | Controle de qualidade inicial | FastQC |
+| 2 | Trimagem de adaptadores e reads de baixa qualidade | Trimmomatic |
+| 3 | Controle de qualidade após trimagem | FastQC |
+| 4 | Indexação do genoma de referência | HISAT2 |
+| 5 | Mapeamento das reads ao genoma | HISAT2 |
+| 6 | Avaliação dos alinhamentos | SAMtools |
+| 7 | Contagem de reads por gene | FeatureCounts |
+
+**Observação:** As etapas serão realizadas utilizando as seis bibliotecas de RNA-seq, considerando as três réplicas biológicas de cada condição experimental.
+
+---
