@@ -23,3 +23,5 @@ Material da disciplina de bioinformática do Departamento de Bioquímica e Biote
 |------|------|----------|
 |Aula 1 | Teoria: Introdução à Bioinformática, sequenciamento e conceitos|[Abrir](aulas/aula01_introducao/README.md)|
 |Aula 2 | Prática: Introdução ao terminal, controle de qualidade|[Abrir](aulas/aula02_sequenciamento/README.md)|
+|Aula 3 | Prática: Controle de qualidade e trimagem|[Abrir](aulas/01_QC_trimagem_transcriptoma/README.md)|
+
