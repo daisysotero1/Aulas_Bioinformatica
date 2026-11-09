@@ -1,6 +1,6 @@
 **Data:** 21/08
 
-# Aula 2: Parte 1 - Introdução ao terminal para análise de sequências biológicas
+# Aula 2: Introdução ao terminal para análise de sequências biológicas
 
 ## Prática síncrona
 
