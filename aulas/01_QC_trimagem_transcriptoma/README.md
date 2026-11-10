@@ -337,18 +337,379 @@ cd ..
 
 ## 5. Controle de qualidade dos dados brutos de sequenciamento
 
-Após o download e a organização dos dados, a análise de RNA-seq seguirá as seguintes etapas:
+Nesta etapa, será realizado o controle de qualidade (QC, *Quality Control*) das reads brutas, ou seja, dos arquivos FASTQ obtidos diretamente do ENA, antes de qualquer processamento.
 
-| Etapa | Procedimento | Ferramenta |
-|---|---|---|
-| 1 | Controle de qualidade inicial | FastQC |
-| 2 | Trimagem de adaptadores e reads de baixa qualidade | Trimmomatic |
-| 3 | Controle de qualidade após trimagem | FastQC |
-| 4 | Indexação do genoma de referência | HISAT2 |
-| 5 | Mapeamento das reads ao genoma | HISAT2 |
-| 6 | Avaliação dos alinhamentos | SAMtools |
-| 7 | Contagem de reads por gene | FeatureCounts |
+Para isso, utilizaremos a ferramenta **FastQC**, que permite avaliar diferentes características das reads, como:
 
-**Observação:** As etapas serão realizadas utilizando as seis bibliotecas de RNA-seq, considerando as três réplicas biológicas de cada condição experimental.
+- Qualidade das bases ao longo das sequências;
+- Distribuição dos valores de qualidade (Phred score);
+- Distribuição do comprimento das reads;
+- Conteúdo de GC;
+- Presença de sequências adaptadoras;
+- Presença de sequências super-representadas.
+
+### 5.1. Ativação do ambiente de análise
+
+Como as ferramentas foram instaladas no ambiente Conda denominado `rnaseq`, precisamos ativá-lo antes de iniciar a análise.
+
+```bash
+conda activate rnaseq
+```
+
+O terminal deverá apresentar o nome do ambiente ativo no início da linha:
+
+```text
+(rnaseq) daisy@Daisy:~/Daisy/rna-seq$
+```
+
+Podemos verificar os diretórios existentes:
+
+```bash
+ls
+```
+
+Resultado esperado:
+
+```text
+0_referencia  1_reads
+```
+
+### 5.2. Criação do diretório para armazenar os resultados
+
+Para manter os resultados organizados, criaremos um diretório denominado `2_qc_brutos`, onde serão armazenados os relatórios gerados pelo FastQC.
+
+```bash
+mkdir 2_qc_brutos
+```
+
+Verifique se o diretório foi criado:
+
+```bash
+ls
+```
+
+Resultado esperado:
+
+```text
+0_referencia  1_reads  2_qc_brutos
+```
+
+### 5.3. Execução do FastQC
+
+Primeiramente, podemos verificar se o FastQC está instalado corretamente:
+
+```bash
+fastqc --version
+```
+
+Para analisar um único arquivo, podemos utilizar o seguinte comando (não executar neste momento):
+
+```bash
+fastqc 1_reads/CT_01_R1.fastq.gz -o 2_qc_brutos/
+```
+
+**Parâmetros:**
+
+- `fastqc`: executa a ferramenta de controle de qualidade;
+- `1_reads/CT_01_R1.fastq.gz`: indica o arquivo FASTQ que será analisado;
+- `-o`: especifica o diretório onde o relatório será salvo;
+- `2_qc_brutos/`: diretório de saída.
+
+Entretanto, como temos 12 arquivos FASTQ (seis amostras, cada uma com R1 e R2), podemos automatizar a análise utilizando um **loop**.
+
+Loops são estruturas de programação que permitem executar repetidamente um conjunto de comandos para diferentes arquivos, sem precisar escrever um comando individual para cada amostra.
+
+Utilizaremos o seguinte comando:
+
+```bash
+for i in 1_reads/*.fastq.gz; do fastqc -t 4 "$i" --outdir 2_qc_brutos/; done
+```
+
+**Entendendo o comando:**
+
+- `for i in`: inicia o loop e define a variável `i`, que representará cada arquivo encontrado;
+- `1_reads/*.fastq.gz`: indica que serão selecionados todos os arquivos com extensão `.fastq.gz` existentes no diretório `1_reads`;
+- `do`: indica o início dos comandos que serão executados para cada arquivo;
+- `fastqc`: executa a análise de qualidade;
+- `-t 4`: permite utilizar até quatro threads (núcleos de processamento) durante a execução;
+- `"$i"`: representa o arquivo que está sendo processado naquele momento;
+- `--outdir 2_qc_brutos/`: define onde os resultados serão armazenados;
+- `done`: indica o encerramento do loop.
+
+**Resultados gerados**
+
+Para cada arquivo FASTQ analisado, o FastQC produzirá dois arquivos:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `.html` | Relatório de qualidade interativo, que pode ser aberto no navegador |
+| `.zip` | Arquivo compactado contendo os dados e resultados utilizados na construção do relatório |
+
+Os resultados serão armazenados no diretório `2_qc_brutos`.
+
+Podemos verificar se os relatórios foram gerados:
+
+```bash
+ls -lh 2_qc_brutos/
+```
+
+### 5.4. Consolidação dos resultados com MultiQC
+
+Como temos vários relatórios individuais, podemos utilizar a ferramenta **MultiQC** para reunir os resultados em um único relatório.
+
+O MultiQC identifica automaticamente os relatórios gerados por ferramentas de bioinformática e organiza suas informações em uma interface interativa.
+
+Primeiramente, verificamos se a ferramenta está instalada:
+
+```bash
+multiqc --version
+```
+
+Para reunir os relatórios do FastQC, utilizaremos:
+
+```bash
+multiqc 2_qc_brutos/ -o 2_qc_brutos/
+```
+
+**Parâmetros:**
+
+- `multiqc`: executa a ferramenta MultiQC;
+- `2_qc_brutos/`: diretório onde estão os relatórios individuais do FastQC;
+- `-o`: define o diretório de saída;
+- `2_qc_brutos/`: diretório onde será salvo o relatório consolidado.
+
+O MultiQC produzirá um arquivo denominado `multiqc_report.html`, além de um diretório com os dados utilizados na construção do relatório.
+
+Para visualizar o relatório, entre no diretório:
+
+```bash
+cd 2_qc_brutos/
+```
+
+Abra a pasta no Windows Explorer:
+
+```bash
+explorer.exe .
+```
+
+Localize e abra o arquivo `multiqc_report.html` no navegador.
+
+### 5.5. Avaliação da qualidade das reads brutas
+
+Após a análise dos relatórios, devemos avaliar os principais indicadores de qualidade e identificar a necessidade de processamento das reads.
+
+Nesta atividade, observamos a necessidade de remover bases das extremidades das reads e estabelecer um comprimento mínimo de 50 pares de bases (pb) para as sequências mantidas.
+
+Como os valores de qualidade Phred apresentaram resultados satisfatórios, não aplicaremos um filtro rigoroso de qualidade ao longo de toda a sequência. Entretanto, utilizaremos parâmetros de remoção de bases nas extremidades.
+
+A trimagem será realizada com a ferramenta Trimmomatic.
 
 ---
+
+## 6. Trimagem das reads
+
+A trimagem (*trimming*) consiste no processamento das reads para remover sequências indesejadas, como bases de baixa qualidade e adaptadores, quando presentes.
+
+Nesta atividade, utilizaremos a ferramenta **Trimmomatic**, que permite realizar esse processamento em dados de sequenciamento paired-end.
+
+### 6.1. Criação do diretório para armazenar as reads trimadas
+
+Primeiramente, precisamos retornar ao diretório principal da análise:
+
+```bash
+cd ..
+```
+
+Criaremos um diretório denominado `3_reads_trimadas`, onde serão armazenadas as reads após o processamento:
+
+```bash
+mkdir 3_reads_trimadas
+```
+
+Verifique os diretórios existentes:
+
+```bash
+ls
+```
+
+Resultado esperado:
+
+```text
+0_referencia  1_reads  2_qc_brutos  3_reads_trimadas
+```
+
+### 6.2. Verificação da instalação do Trimmomatic
+
+Antes de iniciar a trimagem, podemos verificar se a ferramenta está instalada corretamente:
+
+```bash
+trimmomatic -version
+```
+
+### 6.3. Execução do Trimmomatic
+
+Como temos seis amostras paired-end, utilizaremos novamente um loop para automatizar o processamento de todos os arquivos.
+
+O comando será executado em segundo plano, permitindo que o processo continue mesmo se fecharmos o terminal.
+
+```bash
+nohup bash -c 'for i in 1_reads/*_R1.fastq.gz; do
+    s=$(basename "$i" _R1.fastq.gz)
+    trimmomatic PE -threads 4 \
+    "$i" \
+    "1_reads/${s}_R2.fastq.gz" \
+    "3_reads_trimadas/${s}_R1_paired.fastq.gz" \
+    "3_reads_trimadas/${s}_R1_unpaired.fastq.gz" \
+    "3_reads_trimadas/${s}_R2_paired.fastq.gz" \
+    "3_reads_trimadas/${s}_R2_unpaired.fastq.gz" \
+    LEADING:12 TRAILING:3 MINLEN:50
+done' > trimmomatic.log 2>&1 < /dev/null &
+```
+
+Também é possível executar todo o comando em uma única linha. Para isso, basta remover as barras invertidas (\) utilizadas para indicar a quebra de linha, mantendo os espaços entre os argumentos.
+
+**Entendendo o comando:**
+
+- `nohup`: permite que o processo continue executando mesmo que a sessão do terminal seja encerrada;
+- `bash -c`: executa os comandos escritos entre aspas como um script Bash;
+- `for i in 1_reads/*_R1.fastq.gz`: inicia um loop que identifica os arquivos R1 de todas as amostras;
+- `s=$(basename "$i" _R1.fastq.gz)`: extrai o nome da amostra, removendo o sufixo `_R1.fastq.gz`.
+
+Por exemplo, para o arquivo `CT_01_R1.fastq.gz`, a variável `s` receberá o valor `CT_01`.
+
+**Parâmetros do Trimmomatic:**
+
+- `PE`: indica que os dados são paired-end (single-end seria SE);
+- `-threads 4`: permite utilizar quatro threads durante o processamento.
+
+Em seguida, são informados os arquivos de entrada e saída, sempre respeitando a seguinte ordem:
+
+| Posição | Arquivo | Descrição |
+|---|---|---|
+| 1 | R1 de entrada | Primeira extremidade original |
+| 2 | R2 de entrada | Segunda extremidade original |
+| 3 | R1_paired | Reads R1 que permaneceram pareadas |
+| 4 | R1_unpaired | Reads R1 que perderam o par |
+| 5 | R2_paired | Reads R2 que permaneceram pareadas |
+| 6 | R2_unpaired | Reads R2 que perderam o par |
+
+**Parâmetros de trimagem utilizados:**
+
+| Parâmetro | Função |
+|---|---|
+| `LEADING:12` | Remove bases das extremidades iniciais com qualidade Phred inferior a 12 |
+| `TRAILING:3` | Remove bases das extremidades finais com qualidade Phred inferior a 3 |
+| `MINLEN:50` | Descarta reads com comprimento inferior a 50 bases após a trimagem |
+
+**Importante:** nesta análise, não estamos utilizando um filtro de janela deslizante (*SLIDINGWINDOW*). Esse parâmetro poderia ser adicionado para remover regiões de baixa qualidade ao longo das reads, mas optamos por não utilizá-lo inicialmente, considerando os resultados do controle de qualidade bruto. É possível e recomendado fazer mais de uma analise alterando um parâmetro por vez. 
+
+**Arquivos de saída**
+
+Para cada amostra, o Trimmomatic produzirá quatro arquivos:
+
+| Arquivo | Significado |
+|---|---|
+| `R1_paired` | Reads R1 que possuem seu par correspondente em R2 |
+| `R1_unpaired` | Reads R1 cujo par correspondente foi descartado |
+| `R2_paired` | Reads R2 que possuem seu par correspondente em R1 |
+| `R2_unpaired` | Reads R2 cujo par correspondente foi descartado |
+
+Os arquivos  contêm os pares de reads que permaneceram após a trimagem e serão utilizados posteriormente nas análises que exigem dados paired-end. Os arquivos  também podem ser aproveitados em análises que aceitam reads single-end, mas não serão utilizados nessa etapa do nosso fluxo.
+
+Os arquivos `paired` contêm os pares de reads (R1 e R2) que passaram pelos critérios de trimagem e serão utilizados nas análises paired-end. Já os arquivos `unpaired` contêm reads que passaram pelos critérios de trimagem, mas cuja read correspondente do mesmo fragmento foi descartada por não atender a algum dos critérios, como o comprimento mínimo. Portanto, são reads que ficaram sem seu par.
+
+**Entendendo a execução em segundo plano**
+
+Ao final do comando, temos:
+
+- `> trimmomatic.log`: direciona a saída padrão para um arquivo de registro denominado `trimmomatic.log`;
+- `2>&1`: direciona também as mensagens de erro para esse mesmo arquivo;
+- `< /dev/null`: impede que o processo dependa de entradas do terminal;
+- `&`: coloca o processo em segundo plano.
+
+Assim, as mensagens de execução e possíveis erros serão registrados no arquivo `trimmomatic.log`, localizado no diretório principal `rna-seq`.
+
+Para acompanhar o andamento da trimagem:
+
+```bash
+tail -f trimmomatic.log
+```
+
+---
+
+## 7. Controle de qualidade das reads trimadas
+
+Após a trimagem, precisamos realizar novamente o controle de qualidade para verificar se o processamento foi adequado e avaliar as características das reads resultantes.
+
+Essa etapa é importante para comparar os resultados obtidos antes e depois da trimagem, verificando, por exemplo, se houve melhora na qualidade das extremidades, se o comprimento das reads foi preservado conforme os parâmetros estabelecidos e se foi perdido quantidade considerável de reads.
+
+### 7.1. Criação do diretório para armazenar os resultados
+
+No diretório principal `rna-seq`, criaremos um novo diretório denominado `4_qc_trimados`:
+
+```bash
+mkdir 4_qc_trimados
+```
+
+Verifique os diretórios existentes:
+
+```bash
+ls
+```
+
+Resultado esperado:
+
+```text
+0_referencia  1_reads  2_qc_brutos  3_reads_trimadas  4_qc_trimados
+```
+
+### 7.2. Execução do FastQC nas reads trimadas
+
+Utilizaremos novamente o FastQC para avaliar os arquivos resultantes da trimagem.
+
+Como temos quatro arquivos de saída por amostra, serão analisados todos os arquivos `.gz` presentes no diretório `3_reads_trimadas`.
+
+```bash
+for i in 3_reads_trimadas/*.fastq.gz; do fastqc -t 4 "$i" --outdir 4_qc_trimados/ done
+```
+
+Assim como na análise das reads brutas, o FastQC produzirá dois arquivos para cada FASTQ analisado:
+
+- `.html`: relatório interativo de qualidade;
+- `.zip`: arquivo compactado contendo os dados utilizados na geração do relatório.
+
+### 7.3. Consolidação dos resultados com MultiQC
+
+Para facilitar a comparação entre as amostras, utilizaremos novamente o MultiQC para reunir os relatórios individuais do FastQC em um único relatório.
+
+```bash
+multiqc 4_qc_trimados/ -o 4_qc_trimados/
+```
+
+O relatório consolidado será salvo no diretório `4_qc_trimados`, com o nome `multiqc_report.html`.
+
+Para visualizar o resultado:
+
+```bash
+cd 4_qc_trimados/
+explorer.exe .
+```
+
+Abra o arquivo `multiqc_report.html` no navegador.
+
+### 7.4. Avaliação da qualidade após a trimagem
+
+Após a execução do FastQC e do MultiQC, devemos avaliar os resultados e compará-los com aqueles obtidos antes da trimagem.
+
+Alguns aspectos importantes a serem observados são:
+
+- **Qualidade das bases:** verificar se houve melhora nos valores de qualidade ao longo das reads;
+- **Comprimento das reads:** verificar a distribuição dos comprimentos após a remoção das bases;
+- **Conteúdo de GC:** avaliar se a distribuição permaneceu semelhante à observada nos dados brutos;
+- **Sequências adaptadoras:** verificar se houve redução ou remoção das sequências adaptadoras, caso estivessem presentes;
+- **Número de reads:** avaliar quantas reads foram mantidas, descartadas ou perderam seus pares durante a trimagem.
+
+É importante lembrar que nem todos os indicadores do FastQC precisam apresentar o resultado *PASS*. Alguns módulos podem apresentar *WARNING* ou *FAIL* mesmo em dados adequados para análise, dependendo das características do material biológico e da biblioteca de sequenciamento.
+
+Ao final dessa etapa, teremos os arquivos de reads processadas e seus respectivos relatórios de qualidade, que serão utilizados para dar continuidade à análise de RNA-seq.
+
