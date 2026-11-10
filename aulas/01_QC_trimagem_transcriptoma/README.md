@@ -327,9 +327,15 @@ Ao final, teremos os seguintes arquivos:
 
 A organização dos arquivos facilitará a identificação das amostras nas próximas etapas da análise.
 
+Agora podemos voltar ao diretório anterior para inicio do controle de qualidade
+
+```bash
+cd ..
+```
+
 ---
 
-## 5. Próximas etapas da análise
+## 5. Controle de qualidade dos dados brutos de sequenciamento
 
 Após o download e a organização dos dados, a análise de RNA-seq seguirá as seguintes etapas:
 
