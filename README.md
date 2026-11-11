@@ -25,7 +25,7 @@ Material da disciplina de bioinformática do Departamento de Bioquímica e Biote
 |Aula 2 | Prática: Introdução ao terminal|[Abrir](aulas/Introd_terminal_trancript/README.md)|
 |Aula 3 | Prática: Criação de ambiente virtual e instalação de ferramentas |[Abrir](aulas/install_tools/README.md)|
 |Aula 4 | Prática: Controle de qualidade e trimagem|[Abrir](aulas/01_QC_trimagem_transcriptoma/README.md)|
-|Aula 5 | Prática: Mapeamento e contagem de leituras|[Abrir](aulas/01_QC_trimagem_transcriptoma/README.md)|
+|Aula 5 | Prática: Mapeamento e contagem de leituras|[Abrir](aulas/map_count/README.md)|
 |Aula 6 | Prática: Análise de expressão diferencial|[Abrir](aulas/01_QC_trimagem_transcriptoma/README.md)|
 |Aula 7 | Teórica: Atividade de RNA-Seq|[Abrir](aulas/teoria_transcrpt_1/README.md)|
 
