@@ -3,21 +3,17 @@
 
 Após a avaliação da qualidade das reads brutas, a trimagem e a avaliação da qualidade pós-trimagem, a próxima etapa da análise de RNA-seq é o **mapeamento (alignment)**.
 
-O mapeamento consiste em comparar as reads obtidas pelo sequenciamento com uma sequência de referência, buscando identificar em quais regiões do genoma cada read se origina.
+O mapeamento consiste em comparar as reads obtidas pelo sequenciamento após trimagem (se foi feito) com uma sequência de referência (genoma ou transcriptoma montado), buscando identificar em quais regiões da referência cada read se origina.
 
-No caso de RNA-seq, esse processo permite identificar a localização genômica dos fragmentos sequenciados, possibilitando posteriormente determinar quais genes estão sendo expressos e quantificar o número de reads associadas a cada gene.
+No caso de RNA-seq, quando a referência é um genoma, esse processo permite identificar a localização genômica dos fragmentos sequenciados, possibilitando posteriormente determinar quais genes estão sendo expressos e quantificar o número de reads associadas a cada gene.
 
-Nesta atividade, realizaremos o mapeamento contra o genoma de referência de *Drosophila melanogaster*, disponibilizado pelo NCBI (National Center for Biotechnology Information).
+Nesta atividade, realizaremos o mapeamento contra o genoma de referência de *Drosophila melanogaster*, disponibilizado pelo NCBI (National Center for Biotechnology Information). O assembly utilizado será: **GCF_000001215.4 – Release 6 plus ISO1 MT**
 
-O assembly utilizado será:
-
-**GCF_000001215.4 – Release 6 plus ISO1 MT**
-
-O genoma de referência foi previamente obtido na etapa 2 e está armazenado no diretório `0_referencia`, no arquivo `Dmel_genome.fasta`.
+O genoma de referência foi previamente obtido e está armazenado no diretório `0_referencia`, no arquivo `Dmel_genome.fasta`.
 
 ### 8.1. Ferramenta utilizada: HISAT2
 
-Para realizar o mapeamento, utilizaremos a ferramenta **HISAT2**, desenvolvida para o alinhamento de reads de RNA-seq e DNA-seq contra genomas de referência.
+Para realizar o mapeamento, utilizaremos a ferramenta **HISAT2**, desenvolvida para o alinhamento de reads de RNA-seq vs. genomas de referência.
 
 O HISAT2 é especialmente adequado para análises de RNA-seq por permitir o alinhamento de reads que atravessam junções entre éxons (*splice junctions*). Isso é importante porque o RNA mensageiro maduro apresenta íntrons removidos durante o processamento, e, portanto, uma read pode corresponder a regiões de éxons separados por um íntron no genoma.
 
@@ -29,7 +25,7 @@ Antes de realizar o mapeamento, precisamos indexar o genoma de referência.
 
 A indexação consiste em preparar a sequência genômica em uma estrutura de arquivos que permite ao HISAT2 localizar e alinhar as reads de maneira mais eficiente, sem precisar pesquisar diretamente em todo o arquivo FASTA a cada alinhamento.
 
-Para isso, utilizaremos o programa `hisat2-build`, que cria o índice a partir do genoma de referência.
+Para isso, utilizaremos a função `hisat2-build`, que cria o índice a partir do genoma de referência.
 
 **Exemplo de sintaxe para indexação (não executar):**
 
@@ -93,13 +89,11 @@ Dmel_genome.fasta    Dmel_genome_index.2.ht2
                      Dmel_genome_index.8.ht2
 ```
 
-Os arquivos `Dmel_genome_index.1.ht2` até `Dmel_genome_index.8.ht2` correspondem às partes que compõem o índice do genoma.
-
 **Observação:** a indexação é realizada uma única vez para determinado genoma de referência. Assim, o mesmo índice poderá ser utilizado no mapeamento de todas as amostras, sem necessidade de reconstruí-lo para cada biblioteca.
 
 ### 8.3. Criação do diretório para armazenar os resultados do mapeamento
 
-Para manter os resultados organizados, criaremos um diretório denominado `5_mapeamento`, onde serão armazenados os arquivos gerados pelo HISAT2.
+Para manter os resultados organizados, criaremos um diretório denominado `5_mapeamento`, onde serão armazenados os arquivos gerados durante o mapeamento pelo HISAT2.
 
 No diretório principal `rna-seq`, execute:
 
@@ -124,9 +118,7 @@ Resultado esperado:
 
 Antes de executar o HISAT2, precisamos identificar os arquivos FASTQ que serão utilizados como entrada.
 
-Como discutido na etapa de trimagem, os arquivos `paired` contêm os pares de reads que permaneceram associados após o processamento. Já os arquivos `unpaired` contêm reads que perderam seus respectivos pares.
-
-Nesta atividade, utilizaremos somente os arquivos `paired`, pois o mapeamento será realizado considerando a estratégia *paired-end*.
+Como discutido na etapa de trimagem, os arquivos `paired` contêm os pares de reads que permaneceram associados após o processamento. Já os arquivos `unpaired` contêm reads que perderam seus respectivos pares. Nesta atividade, utilizaremos somente os arquivos `paired`, pois o mapeamento será realizado considerando a estratégia *paired-end*.
 
 Podemos listar esses arquivos utilizando:
 
@@ -159,7 +151,7 @@ Como temos seis bibliotecas para mapear, utilizaremos novamente um **loop** para
 
 O processo será executado em segundo plano, utilizando `nohup`, permitindo que continue mesmo que a sessão do terminal seja encerrada.
 
-Utilizaremos o seguinte comando:
+Utilizaremos o seguinte comando (pode executar neste momento):
 
 ```bash
 nohup bash -c '
@@ -208,10 +200,9 @@ R2: 3_reads_trimadas/CT_01_R2_paired.fastq.gz
 
 **Sobre o formato SAM**
 
-O arquivo SAM (*Sequence Alignment/Map*) é um formato de texto que armazena informações sobre o alinhamento das reads contra o genoma de referência.
+O arquivo SAM (*Sequence Alignment/Map*) é um formato de texto que armazena informações sobre o alinhamento das reads vs. o genoma de referência.
 
 Entre as informações armazenadas estão:
-
 - Identificação de cada read;
 - Localização genômica em que ocorreu o alinhamento;
 - Orientação do alinhamento;
