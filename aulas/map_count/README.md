@@ -123,7 +123,7 @@ Como discutido na etapa de trimagem, os arquivos `paired` contêm os pares de re
 Podemos listar esses arquivos utilizando:
 
 ```bash
-ls 3_reads_trimadas/*paired*
+ls 3_reads_trimadas/*_paired.fastq.gz
 ```
 
 Resultado esperado:
