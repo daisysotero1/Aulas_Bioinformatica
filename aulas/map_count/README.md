@@ -1,5 +1,5 @@
 
-## 8. Mapeamento das reads contra o genoma de referência
+## 8. Alinhamento das reads de RNA-seq ao genoma de referência (mapeamento)
 
 Após a avaliação da qualidade das reads brutas, a trimagem e a avaliação da qualidade pós-trimagem, a próxima etapa da análise de RNA-seq é o **mapeamento (alignment)**.
 
