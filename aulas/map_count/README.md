@@ -394,16 +394,6 @@ done
 
 O `samtools quickcheck` verifica aspectos básicos da integridade dos arquivos BAM, incluindo o cabeçalho e o final do arquivo. Se não houver mensagens de erro, os arquivos passaram por essa verificação.
 
-**Importante:** antes de apagar os arquivos SAM, certifique-se de que todos os arquivos BAM foram gerados corretamente e passaram pela verificação de integridade.
-
-Como os arquivos SAM são maiores e já foram convertidos com sucesso, podemos removê-los para liberar espaço em disco:
-
-```bash
-rm 5_mapeamento/*.sam
-```
-
----
-
 ## 10. Contagem das reads por gene utilizando featureCounts
 
 Após realizar o mapeamento das reads e organizar os alinhamentos no formato BAM, a próxima etapa da análise de RNA-seq consiste em **quantificar a expressão gênica**, determinando o número de reads associadas a cada gene.
