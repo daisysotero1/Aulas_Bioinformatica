@@ -76,7 +76,7 @@ Os arquivos utilizados na análise serão:
 
 ### 11.3. Análise de expressão diferencial utilizando DESeq2
 
-Abra o RStudio e execute o código abaixo.
+Abra o RStudio, cole e execute o código abaixo.
 
 ```r
 ############################################################
