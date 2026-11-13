@@ -398,11 +398,7 @@ O `samtools quickcheck` verifica aspectos básicos da integridade dos arquivos B
 
 Após realizar o mapeamento das reads e organizar os alinhamentos no formato BAM, a próxima etapa da análise de RNA-seq consiste em **quantificar a expressão gênica**, determinando o número de reads associadas a cada gene.
 
-Para isso, utilizaremos a ferramenta **featureCounts**, desenvolvida para realizar a contagem de reads alinhadas a regiões genômicas de interesse (*features*), como genes ou éxons.
-
-A ferramenta utiliza dois arquivos principais: os arquivos BAM, que contêm os alinhamentos das reads, e um arquivo de anotação genômica, geralmente no formato GTF ou GFF, que informa a localização e a identificação dos genes no genoma de referência.
-
-A partir dessas informações, o featureCounts identifica quais reads se sobrepõem às regiões anotadas e realiza a contagem correspondente a cada gene.
+Para isso, utilizaremos a ferramenta **featureCounts**, desenvolvida para realizar a contagem de reads alinhadas a regiões genômicas de interesse (*features*), como genes ou éxons. A ferramenta utiliza dois arquivos principais: os arquivos BAM, que contêm os alinhamentos das reads, e um arquivo de anotação genômica, no formato GTF  que informa a localização e a identificação dos genes no genoma de referência. A partir dessas informações, o featureCounts identifica quais reads se sobrepõem às regiões anotadas e realiza a contagem correspondente a cada gene.
 
 Documentação oficial: [featureCounts](https://subread.sourceforge.net/featureCounts.html)
 
