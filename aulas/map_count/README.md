@@ -591,7 +591,7 @@ O arquivo apresenta algumas informações adicionais, como a versão do programa
 3. **Excluir as colunas 2 a 6**, que correspondem às informações de anotação genômica (`Chr`, `Start`, `End`, `Strand` e `Length`).
 4. **Renomear as colunas das amostras**, removendo o caminho dos arquivos BAM `5_mapeamento/` e o sufixo `_sorted.bam`. Por exemplo, `5_mapeamento/CT_01_sorted.bam` passará a ser `CT_01`.
 5. **Salvar o arquivo final** no formato CSV.
-6. **renomear o arquivo final** para `dmelanogaster_counts.csv
+6. **renomear o arquivo final** para `dmelanogaster_counts.csv`
 
 Após essas modificações, teremos uma matriz contendo apenas os identificadores dos genes e suas respectivas contagens em cada amostra.
 
