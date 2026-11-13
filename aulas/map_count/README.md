@@ -584,14 +584,23 @@ Nessa matriz, cada linha representa um gene, enquanto cada coluna representa uma
 </table>
 
 
-O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise. Para organizar a matriz, realizaremos as seguintes modificações:
+O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise. 
 
-1. **Salvar uma cópia** do arquivo original com o nome `counts_2.csv` (CSV MS-DOS) , preservando o arquivo `counts.txt` original.
+
+Para organizar a matriz Entre no diretório `6_featureCounts` para abrir a pasta atual do WSL pelo Explorador de Arquivos do Windows, usando:
+
+```bash
+explorer.exe .
+```
+
+Copie o arquivo o arquivo `counts.txt` para pasta pessoal ou Documentos no windows para em seguida realizaremos as seguintes modificações:
+
+1. **Salvar uma cópia** do arquivo original com o nome `dmelanogaster_counts.csv` (CSV MS-DOS) , preservando o arquivo `counts.txt` original.
 2. **Excluir a primeira linha**, que contém informações sobre a execução do programa.
 3. **Excluir as colunas 2 a 6**, que correspondem às informações de anotação genômica (`Chr`, `Start`, `End`, `Strand` e `Length`).
 4. **Renomear as colunas das amostras**, removendo o caminho dos arquivos BAM `5_mapeamento/` e o sufixo `_sorted.bam`. Por exemplo, `5_mapeamento/CT_01_sorted.bam` passará a ser `CT_01`.
 5. **Salvar o arquivo final** no formato CSV.
-6. **renomear o arquivo final** para `dmelanogaster_counts.csv`
+6. Copie o arquivo `dmelanogaster_counts.csv` para pasta `6_featureCounts` no WSL.
 
 Após essas modificações, teremos uma matriz contendo apenas os identificadores dos genes e suas respectivas contagens em cada amostra.
 
