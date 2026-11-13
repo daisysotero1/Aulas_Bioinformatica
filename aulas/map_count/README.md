@@ -318,3 +318,233 @@ Documentação oficial: [SAMtools](https://www.htslib.org/)
 
 ```bash
 samtools view -@ 6 -b arquivo.sam | samtools sort -@ 6 -o arquivo_sorted.bam
+```
+
+**Entendendo os parâmetros:**
+
+| Parâmetro | Função |
+|---|---|
+| `samtools view` | Permite visualizar, filtrar e converter arquivos de alinhamento. |
+| `-@ 6` | Utiliza seis threads adicionais para as operações de compressão/descompressão. |
+| `-b` | Indica que a saída deverá ser gerada no formato BAM. |
+| `arquivo.sam` | Arquivo SAM de entrada. |
+| `\|` | Encaminha a saída do primeiro comando diretamente para o segundo, sem a necessidade de gerar um arquivo intermediário. |
+| `samtools sort` | Realiza a ordenação dos alinhamentos. |
+| `-o` | Especifica o nome e o caminho do arquivo de saída. |
+| `arquivo_sorted.bam` | Arquivo BAM ordenado por coordenadas genômicas. |
+
+**Importante:** a combinação dos dois comandos permite converter e ordenar os alinhamentos em uma única operação. Primeiro, o `samtools view` converte o SAM para BAM. Em seguida, o `samtools sort` recebe esse resultado diretamente pelo pipeline (`|`) e realiza a ordenação, gerando o arquivo BAM final.
+
+### 9.2. Conversão e ordenação dos arquivos de *Drosophila melanogaster*
+
+Como temos seis bibliotecas mapeadas, utilizaremos novamente um **loop** para automatizar a conversão e a ordenação dos arquivos, evitando a necessidade de executar um comando individual para cada amostra.
+
+No diretório principal `rna-seq`, execute:
+
+```bash
+for sam_file in 5_mapeamento/*.sam; do
+    sample_name=$(basename "$sam_file" .sam)
+
+    echo "Processando amostra: $sample_name"
+
+    samtools view -@ 6 -b "$sam_file" | \
+    samtools sort -@ 6 -o "5_mapeamento/${sample_name}_sorted.bam"
+
+    echo "Concluído: $sample_name"
+    echo "-----------------------------"
+done
+
+echo "Todas as amostras foram processadas!"
+```
+
+**Entendendo o comando:**
+
+- `for sam_file in 5_mapeamento/*.sam`: inicia um loop que identifica todos os arquivos com extensão `.sam` no diretório `5_mapeamento`;
+- `sample_name=$(basename "$sam_file" .sam)`: extrai o nome da amostra, removendo a extensão `.sam`;
+- `echo`: exibe mensagens no terminal para acompanhar o processamento;
+- `samtools view -@ 6 -b`: converte o arquivo SAM para BAM;
+- `samtools sort -@ 6`: recebe o BAM pelo pipeline e ordena os alinhamentos;
+- `-o "5_mapeamento/${sample_name}_sorted.bam"`: define o nome e o caminho do arquivo BAM de saída.
+
+### 9.3. Verificação dos arquivos gerados
+
+Após a conclusão da conversão, podemos verificar os arquivos presentes no diretório `5_mapeamento`:
+
+```bash
+ls -lh 5_mapeamento/
+```
+
+Resultado esperado:
+
+```text
+CT_01.sam         CT_02.sam         CT_03.sam
+GL_01.sam         GL_02.sam         GL_03.sam
+
+CT_01_sorted.bam  CT_02_sorted.bam  CT_03_sorted.bam
+GL_01_sorted.bam  GL_02_sorted.bam  GL_03_sorted.bam
+```
+
+Também podemos verificar a integridade básica dos arquivos BAM utilizando:
+
+```bash
+for bam in 5_mapeamento/*_sorted.bam; do
+    samtools quickcheck -v "$bam"
+done
+```
+
+O `samtools quickcheck` verifica aspectos básicos da integridade dos arquivos BAM, incluindo o cabeçalho e o final do arquivo. Se não houver mensagens de erro, os arquivos passaram por essa verificação.
+
+**Importante:** antes de apagar os arquivos SAM, certifique-se de que todos os arquivos BAM foram gerados corretamente e passaram pela verificação de integridade.
+
+Como os arquivos SAM são maiores e já foram convertidos com sucesso, podemos removê-los para liberar espaço em disco:
+
+```bash
+rm 5_mapeamento/*.sam
+```
+
+---
+
+## 10. Contagem das reads por gene utilizando featureCounts
+
+Após realizar o mapeamento das reads e organizar os alinhamentos no formato BAM, a próxima etapa da análise de RNA-seq consiste em **quantificar a expressão gênica**, determinando o número de reads associadas a cada gene.
+
+Para isso, utilizaremos a ferramenta **featureCounts**, desenvolvida para realizar a contagem de reads alinhadas a regiões genômicas de interesse (*features*), como genes ou éxons.
+
+A ferramenta utiliza dois arquivos principais: os arquivos BAM, que contêm os alinhamentos das reads, e um arquivo de anotação genômica, geralmente no formato GTF ou GFF, que informa a localização e a identificação dos genes no genoma de referência.
+
+A partir dessas informações, o featureCounts identifica quais reads se sobrepõem às regiões anotadas e realiza a contagem correspondente a cada gene.
+
+Documentação oficial: [featureCounts](https://subread.sourceforge.net/featureCounts.html)
+
+### 10.1. Criação do diretório para armazenar os resultados
+
+Primeiramente, criaremos um diretório denominado `6_featureCounts`, onde serão armazenados os arquivos gerados durante a etapa de quantificação.
+
+No diretório principal `rna-seq`, execute:
+
+```bash
+mkdir -p 6_featureCounts
+```
+
+Verifique se o diretório foi criado:
+
+```bash
+ls
+```
+
+Resultado esperado:
+
+```text
+0_referencia
+1_reads
+2_qc_brutos
+3_reads_trimadas
+4_qc_trimados
+5_mapeamento
+6_featureCounts
+```
+
+### 10.2. Entendendo o comando do featureCounts
+
+Antes de executar a contagem das reads, vamos compreender a estrutura do comando.
+
+**Exemplo de sintaxe para uma amostra (não executar):**
+
+```bash
+featureCounts -T 4 -a input_coordenadas.gtf -o output_tabela.txt arquivo_mapeamento_sorted.bam
+```
+
+**Parâmetros:**
+
+| Parâmetro | Função |
+|---|---|
+| `featureCounts` | Executa a ferramenta responsável pela contagem das reads. |
+| `-T 4` | Utiliza quatro threads durante o processamento. |
+| `-a` | Especifica o arquivo de anotação genômica no formato GTF ou GFF. |
+| `input_coordenadas.gtf` | Arquivo contendo as coordenadas e informações dos genes no genoma de referência. |
+| `-o` | Especifica o nome e o caminho do arquivo de saída. |
+| `output_tabela.txt` | Arquivo de saída contendo a tabela de contagem. |
+| `arquivo_mapeamento_sorted.bam` | Arquivo BAM contendo os alinhamentos das reads. |
+
+**Importante:** o arquivo de anotação genômica deve corresponder ao mesmo genoma de referência utilizado durante o mapeamento. Isso garante que as coordenadas utilizadas para identificar os genes sejam compatíveis com os alinhamentos armazenados nos arquivos BAM.
+
+No nosso caso, utilizaremos o arquivo `Dmel_annotation.gtf`, correspondente ao genoma de referência de *Drosophila melanogaster*.
+
+### 10.3. Contagem das reads das seis bibliotecas
+
+Como temos seis bibliotecas, podemos fornecer todos os arquivos BAM ao featureCounts utilizando o caractere curinga `*`. Assim, a ferramenta processará todas as amostras em uma única execução, gerando uma tabela de contagem com os valores correspondentes a cada biblioteca.
+
+**Atenção:** como nossas bibliotecas são *paired-end*, precisamos informar essa característica ao featureCounts. Para contar cada par de reads como um único fragmento sequenciado, utilizaremos os parâmetros `-p --countReadPairs`, disponíveis nas versões recentes da ferramenta.
+
+Portanto, o comando que utilizaremos será:
+
+```bash
+nohup featureCounts \
+    -T 6 \
+    -p --countReadPairs \
+    -a 0_referencia/Dmel_annotation.gtf \
+    -o 6_featureCounts/counts.txt \
+    5_mapeamento/*_sorted.bam \
+    > 6_featureCounts/featureCounts.log 2>&1 < /dev/null &
+```
+
+**Entendendo os parâmetros adicionais:**
+
+| Parâmetro | Função |
+|---|---|
+| `-p` | Informa que os arquivos de entrada contêm reads *paired-end*. |
+| `--countReadPairs` | Conta cada par de reads como um único fragmento, em vez de contabilizar as duas extremidades separadamente. |
+| `nohup` | Permite que o processo continue executando mesmo que a sessão do terminal seja encerrada. |
+| `> 6_featureCounts/featureCounts.log` | Direciona a saída padrão para um arquivo de log. |
+| `2>&1` | Direciona também as mensagens de erro para o mesmo arquivo de log. |
+| `< /dev/null` | Impede que o processo dependa de entradas do terminal. |
+| `&` | Coloca o processo em segundo plano. |
+
+**Observação:** a opção `--countReadPairs` depende da versão do featureCounts instalada. Caso necessário, verifique a versão e as opções disponíveis utilizando:
+
+```bash
+featureCounts -v
+featureCounts -h
+```
+
+### 10.4. Acompanhamento da execução
+
+Como a contagem será realizada para seis bibliotecas, o processamento poderá levar alguns minutos, dependendo do tamanho dos arquivos BAM e dos recursos computacionais disponíveis.
+
+Como utilizamos `nohup`, podemos acompanhar o andamento da execução por meio do arquivo de log:
+
+```bash
+tail -f 6_featureCounts/featureCounts.log
+```
+
+Para sair da visualização do log sem interromper o processamento, pressione `Ctrl + C`.
+
+### 10.5. Verificação dos resultados
+
+Após a conclusão da contagem, podemos verificar os arquivos gerados:
+
+```bash
+ls -lh 6_featureCounts/
+```
+
+Resultado esperado:
+
+```text
+counts.txt
+counts.txt.summary
+featureCounts.log
+```
+
+Os arquivos gerados possuem as seguintes finalidades:
+
+- **`counts.txt`:** tabela contendo os genes identificados na anotação e o número de fragmentos associados a cada gene em cada amostra. Essa tabela será utilizada nas próximas etapas da análise de expressão diferencial.
+- **`counts.txt.summary`:** arquivo contendo um resumo da contagem, com o número de fragmentos atribuídos e não atribuídos às regiões anotadas, incluindo as possíveis razões para a não atribuição.
+- **`featureCounts.log`:** arquivo de registro contendo as mensagens geradas durante a execução da ferramenta.
+
+O arquivo `counts.txt` apresenta, além das informações de identificação dos genes, as coordenadas genômicas e os valores de contagem para cada biblioteca.
+
+Como resultado, teremos uma matriz de contagem na qual as linhas representam os genes e as colunas representam as amostras (CT_01, CT_02, CT_03, GL_01, GL_02 e GL_03).
+
+Essa matriz será utilizada posteriormente para realizar as análises de expressão diferencial, permitindo identificar genes com níveis de expressão significativamente diferentes entre as condições experimentais.
+
+**Importante:** o arquivo `counts.txt.summary` também deve ser avaliado, pois permite verificar quantos fragmentos foram atribuídos aos genes e quantos não puderam ser contabilizados. Essa avaliação ajuda a identificar possíveis problemas relacionados à qualidade dos alinhamentos ou à compatibilidade entre a anotação genômica e o genoma de referência.
