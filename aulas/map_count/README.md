@@ -535,8 +535,6 @@ Nessa matriz, cada linha representa um gene, enquanto cada coluna representa uma
 
 **Estrutura original do arquivo `counts.txt`:**
 
-O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise.
-
 <table>
 <tr>
 <td colspan="12"># Program:featureCounts v2.1.1; Command:"featureCounts" "-T" "6" "-p" "--countReadPairs" "-a" "0_referencia/Dmel_annotation.gtf" "-o" "6_featureCounts/counts.txt" "5_mapeamento/CT_01_sorted.bam" "5_mapeamento/CT_02_sorted.bam" "5_mapeamento/CT_03_sorted.bam" "5_mapeamento/GL_01_sorted.bam" "5_mapeamento/GL_02_sorted.bam" "5_mapeamento/GL_03_sorted.bam"</td>
@@ -585,12 +583,13 @@ O arquivo apresenta algumas informações adicionais, como a versão do programa
 </tr>
 </table>
 
-Para organizar a matriz, realizaremos as seguintes modificações:
+
+O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise. Para organizar a matriz, realizaremos as seguintes modificações:
 
 1. **Salvar uma cópia** do arquivo original com o nome `counts_2.csv`, preservando o arquivo `counts.txt` original.
 2. **Excluir a primeira linha**, que contém informações sobre a execução do programa.
 3. **Excluir as colunas 2 a 6**, que correspondem às informações de anotação genômica (`Chr`, `Start`, `End`, `Strand` e `Length`).
-4. **Renomear as colunas das amostras**, removendo o caminho dos arquivos BAM e o sufixo `_sorted.bam`. Por exemplo, `5_mapeamento/CT_01_sorted.bam` passará a ser `CT_01`.
+4. **Renomear as colunas das amostras**, removendo o caminho dos arquivos BAM `5_mapeamento/` e o sufixo `_sorted.bam`. Por exemplo, `5_mapeamento/CT_01_sorted.bam` passará a ser `CT_01`.
 5. **Salvar o arquivo final** no formato CSV.
 
 Após essas modificações, teremos uma matriz contendo apenas os identificadores dos genes e suas respectivas contagens em cada amostra.
