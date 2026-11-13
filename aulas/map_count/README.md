@@ -601,15 +601,7 @@ Após essas modificações, teremos uma matriz contendo apenas os identificadore
 | Dmel_CR40469 | 9 | 24 | 17 | 56 | 54 | 40 |
 | Dmel_CG17636 | 1102 | 1121 | 1379 | 1387 | 1497 | 1398 |
 
-Essa matriz simplificada será utilizada como entrada para a próxima etapa da análise.
+Essa matriz será utilizada como entrada para a próxima etapa da análise.
 
-### 10.7. Análise de expressão diferencial de genes
 
-Com a matriz de contagem organizada, podemos iniciar a análise de expressão diferencial entre os grupos experimentais.
-
-Nessa etapa, serão identificados os genes que apresentam diferenças significativas nos níveis de expressão entre as condições experimentais CT e GL.
-
-Para isso, utilizaremos o pacote **DESeq2**, disponível no ambiente R/Bioconductor. Essa ferramenta utiliza modelos estatísticos baseados na distribuição binomial negativa para analisar os dados de contagem, considerando a variabilidade entre as réplicas biológicas e normalizando as diferenças na profundidade de sequenciamento entre as amostras.
-
-A análise permitirá identificar genes diferencialmente expressos (DEGs), considerando critérios estatísticos e de magnitude de variação da expressão.
 
