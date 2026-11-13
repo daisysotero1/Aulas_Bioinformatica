@@ -713,11 +713,6 @@ write.csv(
 # FIM DA ANÁLISE
 ############################################################
 ```
-
-### 11.4. Interpretação dos resultados
-
-Ao final da análise, teremos o arquivo `DEGs.csv`, contendo os genes diferencialmente expressos entre os grupos experimentais.
-
 A interpretação dos resultados considera principalmente:
 
 - **log2FoldChange positivo:** genes com maior expressão no grupo Treated em relação ao Control.
@@ -726,3 +721,9 @@ A interpretação dos resultados considera principalmente:
 - **|log2FoldChange| maior ou igual a 1:** genes com variação de expressão de pelo menos duas vezes.
 
 Os genes identificados podem posteriormente ser utilizados em análises funcionais, como enriquecimento de Gene Ontology (GO), análise de vias metabólicas (KEGG) e construção de redes de interação gênica.
+
+### 11.4. Visualização dos resultados por volcano plot - Em python
+
+Ao final da análise, teremos o arquivo `DEGs.csv`, contendo os genes diferencialmente expressos entre os grupos experimentais. Esse arquivo será input para o volcano plot.
+
+
