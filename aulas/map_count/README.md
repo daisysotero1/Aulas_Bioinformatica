@@ -537,14 +537,6 @@ Nessa matriz, cada linha representa um gene, enquanto cada coluna representa uma
 
 O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise.
 
-Exemplo simplificado:
-
-| Geneid | Chr | Start | End | Strand | Length | CT_01 | CT_02 | CT_03 | GL_01 | GL_02 | GL_03 |
-|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|
-| Dmel_CR40469 | NC_004354.4 | 122493 | 122706 | + | 214 | 9 | 24 | 17 | 56 | 54 | 40 |
-| Dmel_CG17636 | NC_004354.4 | ... | ... | - | 2036 | 1102 | 1121 | 1379 | 1387 | 1497 | 1398 |
-
-
 <table>
 <tr>
 <td colspan="12"># Program:featureCounts v2.1.1; Command:"featureCounts" "-T" "6" "-p" "--countReadPairs" "-a" "0_referencia/Dmel_annotation.gtf" "-o" "6_featureCounts/counts.txt" "5_mapeamento/CT_01_sorted.bam" "5_mapeamento/CT_02_sorted.bam" "5_mapeamento/CT_03_sorted.bam" "5_mapeamento/GL_01_sorted.bam" "5_mapeamento/GL_02_sorted.bam" "5_mapeamento/GL_03_sorted.bam"</td>
