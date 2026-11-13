@@ -586,15 +586,16 @@ Nessa matriz, cada linha representa um gene, enquanto cada coluna representa uma
 
 O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise. Para organizar a matriz, realizaremos as seguintes modificações:
 
-1. **Salvar uma cópia** do arquivo original com o nome `counts_2.csv`, preservando o arquivo `counts.txt` original.
+1. **Salvar uma cópia** do arquivo original com o nome `counts_2.csv` (CSV MS-DOS) , preservando o arquivo `counts.txt` original.
 2. **Excluir a primeira linha**, que contém informações sobre a execução do programa.
 3. **Excluir as colunas 2 a 6**, que correspondem às informações de anotação genômica (`Chr`, `Start`, `End`, `Strand` e `Length`).
 4. **Renomear as colunas das amostras**, removendo o caminho dos arquivos BAM `5_mapeamento/` e o sufixo `_sorted.bam`. Por exemplo, `5_mapeamento/CT_01_sorted.bam` passará a ser `CT_01`.
 5. **Salvar o arquivo final** no formato CSV.
+6. **renomear o arquivo final** para `dmelanogaster_counts.csv
 
 Após essas modificações, teremos uma matriz contendo apenas os identificadores dos genes e suas respectivas contagens em cada amostra.
 
-**Estrutura final esperada (`counts_2.csv`):**
+**Estrutura final esperada (`dmelanogaster_counts.csv`):**
 
 | Geneid | CT_01 | CT_02 | CT_03 | GL_01 | GL_02 | GL_03 |
 |---|---:|---:|---:|---:|---:|---:|
