@@ -544,6 +544,55 @@ Exemplo simplificado:
 | Dmel_CR40469 | NC_004354.4 | 122493 | 122706 | + | 214 | 9 | 24 | 17 | 56 | 54 | 40 |
 | Dmel_CG17636 | NC_004354.4 | ... | ... | - | 2036 | 1102 | 1121 | 1379 | 1387 | 1497 | 1398 |
 
+
+<table>
+<tr>
+<td colspan="12"># Program:featureCounts v2.1.1; Command:"featureCounts" "-T" "6" "-p" "--countReadPairs" "-a" "0_referencia/Dmel_annotation.gtf" "-o" "6_featureCounts/counts.txt" "5_mapeamento/CT_01_sorted.bam" "5_mapeamento/CT_02_sorted.bam" "5_mapeamento/CT_03_sorted.bam" "5_mapeamento/GL_01_sorted.bam" "5_mapeamento/GL_02_sorted.bam" "5_mapeamento/GL_03_sorted.bam"</td>
+</tr>
+<tr>
+<th>Geneid</th>
+<th>Chr</th>
+<th>Start</th>
+<th>End</th>
+<th>Strand</th>
+<th>Length</th>
+<th>CT_01</th>
+<th>CT_02</th>
+<th>CT_03</th>
+<th>GL_01</th>
+<th>GL_02</th>
+<th>GL_03</th>
+</tr>
+<tr>
+<td>Dmel_CR40469</td>
+<td>NC_004354.4</td>
+<td>122493</td>
+<td>122706</td>
+<td>+</td>
+<td>214</td>
+<td>9</td>
+<td>24</td>
+<td>17</td>
+<td>56</td>
+<td>54</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Dmel_CG17636</td>
+<td>NC_004354.4</td>
+<td>...</td>
+<td>...</td>
+<td>-</td>
+<td>2036</td>
+<td>1102</td>
+<td>1121</td>
+<td>1379</td>
+<td>1387</td>
+<td>1497</td>
+<td>1398</td>
+</tr>
+</table>
+
 Para organizar a matriz, realizaremos as seguintes modificações:
 
 1. **Salvar uma cópia** do arquivo original com o nome `counts_2.csv`, preservando o arquivo `counts.txt` original.
