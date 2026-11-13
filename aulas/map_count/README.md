@@ -527,10 +527,49 @@ Os arquivos gerados possuem as seguintes finalidades:
 - **`counts.txt.summary`:** arquivo contendo um resumo da contagem, com o número de fragmentos atribuídos e não atribuídos às regiões anotadas, incluindo as possíveis razões para a não atribuição.
 - **`featureCounts.log`:** arquivo de registro contendo as mensagens geradas durante a execução da ferramenta.
 
-O arquivo `counts.txt` apresenta, além das informações de identificação dos genes, as coordenadas genômicas e os valores de contagem para cada biblioteca.
+### 10.6. Organização da matriz de contagem para a análise de expressão diferencial
 
-Como resultado, teremos uma matriz de contagem na qual as linhas representam os genes e as colunas representam as amostras (CT_01, CT_02, CT_03, GL_01, GL_02 e GL_03).
+Após a execução do featureCounts, o arquivo `counts.txt`, localizado no diretório `6_featureCounts/`, contém a matriz de contagem que será utilizada na análise de expressão diferencial.
 
-Essa matriz será utilizada posteriormente para realizar as análises de expressão diferencial, permitindo identificar genes com níveis de expressão significativamente diferentes entre as condições experimentais.
+Nessa matriz, cada linha representa um gene, enquanto cada coluna representa uma amostra (CT_01, CT_02, CT_03, GL_01, GL_02 e GL_03), contendo o número de fragmentos atribuídos a cada gene. Entretanto, antes de utilizar essa matriz nas próximas etapas, precisamos realizar algumas modificações para adequar o arquivo ao formato de entrada das ferramentas de análise de expressão diferencial, como DESeq2.
 
-**Importante:** o arquivo `counts.txt.summary` também deve ser avaliado, pois permite verificar quantos fragmentos foram atribuídos aos genes e quantos não puderam ser contabilizados. Essa avaliação ajuda a identificar possíveis problemas relacionados à qualidade dos alinhamentos ou à compatibilidade entre a anotação genômica e o genoma de referência.
+**Estrutura original do arquivo `counts.txt`:**
+
+O arquivo apresenta algumas informações adicionais, como a versão do programa, o comando utilizado e as características das regiões genômicas (cromossomo, posição inicial, posição final, fita e comprimento). Essas informações não são necessárias para a matriz de contagem que será utilizada na análise.
+
+Exemplo simplificado:
+
+| Geneid | Chr | Start | End | Strand | Length | CT_01 | CT_02 | CT_03 | GL_01 | GL_02 | GL_03 |
+|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|
+| Dmel_CR40469 | NC_004354.4 | 122493 | 122706 | + | 214 | 9 | 24 | 17 | 56 | 54 | 40 |
+| Dmel_CG17636 | NC_004354.4 | ... | ... | - | 2036 | 1102 | 1121 | 1379 | 1387 | 1497 | 1398 |
+
+Para organizar a matriz, realizaremos as seguintes modificações:
+
+1. **Salvar uma cópia** do arquivo original com o nome `counts_2.csv`, preservando o arquivo `counts.txt` original.
+2. **Excluir a primeira linha**, que contém informações sobre a execução do programa.
+3. **Excluir as colunas 2 a 6**, que correspondem às informações de anotação genômica (`Chr`, `Start`, `End`, `Strand` e `Length`).
+4. **Renomear as colunas das amostras**, removendo o caminho dos arquivos BAM e o sufixo `_sorted.bam`. Por exemplo, `5_mapeamento/CT_01_sorted.bam` passará a ser `CT_01`.
+5. **Salvar o arquivo final** no formato CSV.
+
+Após essas modificações, teremos uma matriz contendo apenas os identificadores dos genes e suas respectivas contagens em cada amostra.
+
+**Estrutura final esperada (`counts_2.csv`):**
+
+| Geneid | CT_01 | CT_02 | CT_03 | GL_01 | GL_02 | GL_03 |
+|---|---:|---:|---:|---:|---:|---:|
+| Dmel_CR40469 | 9 | 24 | 17 | 56 | 54 | 40 |
+| Dmel_CG17636 | 1102 | 1121 | 1379 | 1387 | 1497 | 1398 |
+
+Essa matriz simplificada será utilizada como entrada para a próxima etapa da análise.
+
+### 10.7. Análise de expressão diferencial de genes
+
+Com a matriz de contagem organizada, podemos iniciar a análise de expressão diferencial entre os grupos experimentais.
+
+Nessa etapa, serão identificados os genes que apresentam diferenças significativas nos níveis de expressão entre as condições experimentais CT e GL.
+
+Para isso, utilizaremos o pacote **DESeq2**, disponível no ambiente R/Bioconductor. Essa ferramenta utiliza modelos estatísticos baseados na distribuição binomial negativa para analisar os dados de contagem, considerando a variabilidade entre as réplicas biológicas e normalizando as diferenças na profundidade de sequenciamento entre as amostras.
+
+A análise permitirá identificar genes diferencialmente expressos (DEGs), considerando critérios estatísticos e de magnitude de variação da expressão.
+
