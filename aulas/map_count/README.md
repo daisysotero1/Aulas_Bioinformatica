@@ -292,3 +292,29 @@ Cada arquivo conterá os alinhamentos das reads R1 e R2 da respectiva amostra.
 Os arquivos SAM podem ocupar bastante espaço em disco, pois armazenam informações detalhadas sobre os alinhamentos. Posteriormente, eles poderão ser convertidos para o formato BAM (*Binary Alignment/Map*), que é uma versão binária e compactada do SAM.
 
 **Ao final desta etapa, teremos realizado o mapeamento das seis bibliotecas de RNA-seq contra o genoma de referência de *Drosophila melanogaster*.** Os arquivos gerados serão utilizados nas próximas etapas da análise, incluindo a conversão, ordenação e indexação dos alinhamentos e, posteriormente, a contagem das reads por gene utilizando o FeatureCounts.
+
+
+## 9. Convertendo de SAM para BAM e ordenando os alinhamentos
+
+Após realizar o mapeamento das reads contra o genoma de referência utilizando o HISAT2, temos como resultado arquivos no formato SAM (*Sequence Alignment/Map*).
+
+Embora o formato SAM armazene todas as informações dos alinhamentos, ele é um arquivo de texto e, por isso, pode ocupar bastante espaço em disco. Além disso, seu processamento pode ser menos eficiente quando comparado a formatos binários.
+
+Para otimizar o armazenamento e facilitar as etapas seguintes da análise, converteremos os arquivos SAM para o formato BAM (*Binary Alignment/Map*).
+
+O formato BAM armazena as mesmas informações do SAM, mas em formato binário compactado, reduzindo significativamente o tamanho dos arquivos. Além disso, permite operações mais eficientes de leitura e processamento.
+
+Também realizaremos a **ordenação dos alinhamentos (*sorting*)**, organizando as reads de acordo com suas posições no genoma de referência (ordenação por coordenadas genômicas). Essa organização é importante para facilitar o processamento e a utilização dos arquivos em ferramentas posteriores.
+
+### 9.1. Ferramenta utilizada: SAMtools
+
+Para realizar essas operações, utilizaremos o **SAMtools**, um conjunto de ferramentas desenvolvido para manipular arquivos de alinhamento nos formatos SAM, BAM e CRAM.
+
+Entre suas funcionalidades estão a conversão de formatos, ordenação dos alinhamentos, indexação dos arquivos BAM e extração de informações dos alinhamentos.
+
+Documentação oficial: [SAMtools](https://www.htslib.org/)
+
+**Comando genérico para conversão e ordenação (não executar):**
+
+```bash
+samtools view -@ 6 -b arquivo.sam | samtools sort -@ 6 -o arquivo_sorted.bam
