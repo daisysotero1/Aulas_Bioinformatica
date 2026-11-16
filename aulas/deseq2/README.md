@@ -711,17 +711,30 @@ write.csv(
 ############################################################
 
 ```
-A interpretação dos resultados considera principalmente:
+### 11.4. Visualização dos resultados por Volcano Plot (Python)
 
-- **log2FoldChange positivo:** genes com maior expressão no grupo Treated em relação ao Control.
-- **log2FoldChange negativo:** genes com menor expressão no grupo Treated em relação ao Control.
-- **padj menor que 0,05:** genes com diferenças estatisticamente significativas após correção para múltiplos testes.
-- **|log2FoldChange| maior ou igual a 1:** genes com variação de expressão de pelo menos duas vezes.
+Ao final da análise de expressão diferencial utilizando o **DESeq2**, teremos o arquivo `resultados_DESeq2_all.csv`, contendo os resultados da comparação entre os grupos experimentais.
 
-Os genes identificados podem posteriormente ser utilizados em análises funcionais, como enriquecimento de Gene Ontology (GO), análise de vias metabólicas (KEGG) e construção de redes de interação gênica.
+Esse arquivo apresenta os resultados de **todos os genes avaliados**, sem aplicar filtros prévios de significância estatística (*p-value* ou *padj*) ou de magnitude de expressão (*log2FoldChange*). Portanto, serão mantidos tanto os genes que apresentaram alterações significativas na expressão quanto aqueles que não apresentaram diferenças significativas entre os grupos.
 
-### 11.4. Visualização dos resultados por volcano plot - Em python
+Utilizaremos esses resultados completos como entrada (*input*) para construir o **volcano plot em Python**. Dessa forma, será possível visualizar a distribuição de todos os genes, destacando aqueles com aumento de expressão (*upregulated*), redução de expressão (*downregulated*) e aqueles sem alterações significativas (*no change*).
 
-Ao final da análise, teremos o arquivo `DEGs.csv`, contendo os genes diferencialmente expressos entre os grupos experimentais. Esse arquivo será input para o volcano plot.
+O código para a construção do gráfico estará disponível no GitHub, no arquivo `Volcano_all.ipynb`.
 
+**Primeiro passo: baixar e abrir o notebook no Google Colab**
 
+O arquivo `Volcano_all.ipynb` é um *Jupyter Notebook*, um documento interativo que permite executar códigos em Python, visualizar os resultados e inserir textos explicativos e comentários. Sua extensão `.ipynb` identifica esse formato de arquivo.
+
+Para executar o código, seguiremos as etapas abaixo:
+
+1. **Baixar o arquivo:** acesse o repositório no GitHub e faça o download do arquivo `Volcano_all.ipynb` para o seu computador.
+
+2. **Acessar o Google Colab:** abra o [Google Colab](https://colab.research.google.com/) e entre utilizando sua conta Google (Gmail).
+
+3. **Criar um novo notebook:** na página inicial, clique em **Novo notebook** (*New notebook*).
+
+4. **Abrir o notebook baixado:** com o novo notebook aberto, acesse o menu **Arquivo (File) > Abrir notebook (Open notebook)**.
+
+5. **Fazer o upload:** na janela que será aberta, selecione a aba **Upload** e clique em **Procurar (Browse)** para localizar e selecionar o arquivo `Volcano_all.ipynb` que foi baixado anteriormente.
+
+Após essas etapas, o notebook será aberto no Google Colab. A partir dele, vamos executar e compreender cada etapa do código utilizado para gerar o volcano plot, interpretando os resultados obtidos.
