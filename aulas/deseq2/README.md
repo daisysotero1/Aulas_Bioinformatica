@@ -79,6 +79,7 @@ Os arquivos utilizados na análise serão:
 Abra o RStudio, cole e execute o código abaixo.
 
 ```r
+
 ############################################################
 # ANÁLISE DE EXPRESSÃO DIFERENCIAL DE GENES COM DESeq2
 ############################################################
@@ -86,7 +87,7 @@ Abra o RStudio, cole e execute o código abaixo.
 # Objetivo:
 # Identificar genes diferencialmente expressos (DEGs) entre
 # dois grupos experimentais, utilizando dados de RNA-seq.
-
+#
 # O DESeq2 utiliza modelos estatísticos baseados na
 # distribuição binomial negativa para identificar diferenças
 # na expressão dos genes entre as condições experimentais.
@@ -141,10 +142,10 @@ dir()
 
 # A matriz de contagem contém o número de reads atribuídas
 # a cada gene em cada amostra.
-
+#
 # Linhas: genes
 # Colunas: amostras
-
+#
 # IMPORTANTE: o DESeq2 deve receber contagens brutas
 # (inteiras), e não valores normalizados, TPM ou FPKM.
 
@@ -164,10 +165,10 @@ dim(counts_data)
 
 
 # IMPORTAR OS METADADOS
-
+#
 # Os metadados contêm informações sobre cada amostra,
 # incluindo o grupo experimental ao qual ela pertence.
-
+#
 # Cada linha representa uma amostra.
 # A coluna Group identifica o grupo experimental.
 
@@ -203,7 +204,7 @@ table(metadata$Group)
 
 # É fundamental garantir que as colunas da matriz de
 # contagem correspondam às linhas dos metadados.
-
+#
 # Além disso, as amostras devem estar exatamente na mesma
 # ordem nos dois arquivos.
 
@@ -219,12 +220,12 @@ all(colnames(counts_data) == rownames(metadata))
 ############################################################
 
 # O DESeqDataSet é o objeto principal utilizado pelo DESeq2.
-
+#
 # Ele reúne:
 # - A matriz de contagem dos genes;
 # - Os metadados das amostras;
 # - O delineamento experimental (design).
-
+#
 # O design = ~ Group indica que queremos avaliar diferenças
 # na expressão gênica associadas ao grupo experimental.
 
@@ -249,10 +250,10 @@ counts(deseq_dataset)[1:6, 1:4]
 # Genes com pouquíssimas reads em todas as amostras
 # geralmente fornecem pouca informação para a análise
 # estatística e podem aumentar o custo computacional.
-
+#
 # Neste exemplo, serão mantidos apenas genes cuja soma
 # das contagens em todas as amostras seja >= 10.
-
+#
 # ATENÇÃO: o filtro considera a soma das reads de cada gene
 # entre todas as amostras, e não a contagem individual
 # em cada amostra.
@@ -271,9 +272,9 @@ dim(deseq_dataset)
 
 # O grupo de referência é utilizado como base para calcular
 # as diferenças de expressão entre as condições.
-
+#
 # Neste exemplo, Control será o grupo de referência.
-
+#
 # Assim, o log2FoldChange será calculado considerando
 # a expressão do outro grupo em relação ao Control.
 
@@ -293,17 +294,17 @@ levels(deseq_dataset$Group)
 ############################################################
 
 # A função DESeq() executa as principais etapas da análise:
-
+#
 # 1. Estima os fatores de tamanho (size factors), utilizados
 #    para normalizar as diferenças de profundidade de
 #    sequenciamento entre as amostras.
-
+#
 # 2. Estima a dispersão dos genes, considerando a variabilidade
 #    biológica observada entre as amostras.
-
+#
 # 3. Ajusta modelos estatísticos baseados na distribuição
 #    binomial negativa para cada gene.
-
+#
 # 4. Realiza os testes estatísticos para identificar
 #    diferenças de expressão entre os grupos.
 
@@ -319,13 +320,13 @@ deseq_dataset
 
 # As contagens brutas podem variar entre amostras devido
 # a diferenças na profundidade de sequenciamento.
-
+#
 # O DESeq2 estima fatores de tamanho (size factors) para
 # corrigir essas diferenças.
-
+#
 # A normalização permite comparar os níveis de expressão
 # entre amostras de maneira mais adequada.
-
+#
 # IMPORTANTE:
 # A normalização não transforma os dados em TPM ou FPKM.
 # São contagens ajustadas pelos fatores de tamanho.
@@ -357,23 +358,23 @@ head(counts_data) #comparar com a tabela original
 # O PCA (Principal Component Analysis) é uma análise
 # exploratória utilizada para avaliar a distribuição
 # e a similaridade entre as amostras.
-
+#
 # Permite verificar:
 # - Se as amostras do mesmo grupo apresentam comportamento
 #   semelhante;
 # - Se os grupos experimentais apresentam separação;
 # - Se existem amostras discrepantes (possíveis outliers).
-
+#
 # O PCA é uma análise exploratória e não identifica,
 # por si só, genes diferencialmente expressos.
-
+#
 # Por que não utilizar diretamente as contagens brutas?
-
+#
 # As contagens apresentam diferenças de profundidade de
 # sequenciamento e variância dependente da média.
 # Por isso, utilizamos uma transformação estabilizadora
 # da variância (VST), após a normalização.
-
+#
 #VST é uma transformação dos dados já normalizados, com o
 #objetivo de torná-los mais adequados para análises exploratórias.
 
@@ -381,7 +382,7 @@ vsd <- vst(
   deseq_dataset, #resultado do DESEq2
   blind = FALSE
 )
-
+?vst
 # Obter a matriz de expressão transformada
 vst_counts <- assay(vsd)
 
@@ -390,10 +391,10 @@ head(vst_counts)
 
 
 # REALIZAR O PCA
-
+#
 # A função plotPCA seleciona automaticamente os 500 genes
 # mais variáveis para realizar a análise.
-
+#
 # As amostras precisam estar nas linhas e os genes
 # nas colunas. A função já realiza essa organização.
 
@@ -428,13 +429,13 @@ pca_plot <- ggplot(
     color = Group
   )
 ) +
-
+  
   # Pontos representando as amostras
   geom_point(
     size = 4,
     alpha = 0.9
   ) +
-
+  
   # Identificação dos eixos e legenda
   labs(
     title = "Principal Component Analysis",
@@ -442,41 +443,41 @@ pca_plot <- ggplot(
     y = paste0("PC2 (", percentVar[2], "%)"),
     color = "Treatment"
   ) +
-
+  
   # Tema visual
   theme_classic(base_size = 14) +
-
+  
   theme(
     plot.title = element_text(
       size = 16,
       face = "bold",
       hjust = 0.5
     ),
-
+    
     axis.title = element_text(
       size = 13,
       face = "bold"
     ),
-
+    
     axis.text = element_text(
       size = 11,
       color = "black"
     ),
-
+    
     axis.line = element_line(
       linewidth = 0.7,
       color = "black"
     ),
-
+    
     legend.title = element_text(
       face = "bold",
       size = 12
     ),
-
+    
     legend.text = element_text(size = 11),
-
+    
     legend.position = "bottom",
-
+    
     plot.margin = margin(15, 15, 15, 15)
   )
 
@@ -499,67 +500,74 @@ print(pca_plot)
 
 # A função results() extrai os resultados dos testes
 # estatísticos realizados pelo DESeq2.
-
+#
 # Como Control foi definido como grupo de referência,
 # a comparação será realizada entre o outro grupo
 # experimental e Control.
-
+#
 # alpha = 0.05 define o nível de significância utilizado
 # pelo DESeq2 para o procedimento de filtragem independente.
 
 resultados <- results(
-  deseq_dataset, #resultado do DESeq2
-  alpha = 0.05
-)
+  deseq_dataset #resultado do DESeq2
+ )
 
-# Visualizar os resultados
-resultados
+# O resumo considera o padj e por padrão, o limiar de 
+#log2FoldChange é zero.
+summary(resultados)
 
 # Converter para data.frame, se necessário
 resultados_df <- as.data.frame(resultados)
 resultados_df
 
-#write.csv(resultados_df,"resultados_DESeq2.csv",row.names = TRUE)
+
+write.csv(resultados_df,"resultados_DESeq2_all.csv",row.names = TRUE)
+
+## O argumento alpha = 0.05 foi definido de modo que o resumo utiliza esse limiar.
+#n precisa salvar agora
+resultados_2 <- results(deseq_dataset, alpha = 0.05)
+summary(resultados_2)
+
 
 ############################################################
 # 12. ENTENDER AS COLUNAS DOS RESULTADOS
 ############################################################
 
 # Cada linha representa um gene analisado.
-
+#
 # As principais colunas são:
-
+#
 # baseMean:
 # Média das contagens normalizadas do gene considerando
 # todas as amostras.
-
+#
 # log2FoldChange:
 # Indica a magnitude e a direção da diferença de expressão
 # entre os grupos experimentais.
-
+#
 # Valores positivos: maior expressão no grupo experimental
 # em relação ao Control.
-
+#
 # Valores negativos: menor expressão no grupo experimental
 # em relação ao Control.
-
+#
 # lfcSE:
 # Erro padrão (standard error) da estimativa do log2FoldChange.
 # Indica a incerteza associada à estimativa.
-
+#
 # stat:
 # Estatística do teste de Wald, calculada a partir da
 # estimativa do log2FoldChange e seu erro padrão.
-
+#
 # pvalue:
 # Valor de p não ajustado, utilizado para avaliar a
 # significância estatística de cada gene.
-
+#
 # padj:
 # Valor de p ajustado para múltiplos testes pelo método
 # de Benjamini-Hochberg (controle da taxa de falsas
 # descobertas - FDR).
-
+#
 # A coluna padj é utilizada para selecionar os genes
 # diferencialmente expressos, pois milhares de genes
 # são testados simultaneamente.
@@ -569,37 +577,26 @@ resultados_df
 # 13. RESUMO DOS RESULTADOS
 ############################################################
 
-# A função summary() apresenta um resumo da análise,
-# incluindo a quantidade de genes com resultados
-# significativos e a direção da alteração de expressão.
-
-# O resumo considera o padj e por padrão, o limiar de
-#log2FoldChange é zero.
-
 summary(resultados)
-
-# O argumento alpha = 0.05 foi definido anteriormente
-# em results(), de modo que o resumo utiliza esse limiar.
-
 
 ############################################################
 # 14. SELECIONAR OS GENES DIFERENCIALMENTE EXPRESSOS (DEGs)
 ############################################################
 
 # Para selecionar os DEGs, serão utilizados dois critérios:
-
+#
 # 1. padj < 0.05:
 #    Indica significância estatística após correção
 #    para múltiplos testes.
-
+#
 # 2. |log2FoldChange| >= 1:
 #    Indica uma variação de expressão de pelo menos
 #    duas vezes (fold change >= 2 ou <= 0.5).
-
+#
 # O valor absoluto (abs) permite selecionar tanto os genes
 # com expressão aumentada quanto aqueles com expressão
 # reduzida.
-
+#
 # IMPORTANTE:
 # log2FoldChange >= 1  -> expressão pelo menos 2 vezes maior.
 # log2FoldChange <= -1 -> expressão pelo menos 2 vezes menor.
@@ -623,10 +620,10 @@ nrow(DEGs)
 ############################################################
 
 # GENES AUMENTADOS (UPREGULATED)
-
+#
 # Genes que apresentam expressão pelo menos duas vezes
 # maior no grupo experimental em relação ao Control.
-
+#
 # Critérios:
 # padj < 0.05
 # log2FoldChange >= 1
@@ -640,10 +637,10 @@ DEGs_up <- subset(
 
 
 # GENES REDUZIDOS (DOWNREGULATED)
-
+#
 # Genes que apresentam expressão pelo menos duas vezes
 # menor no grupo experimental em relação ao Control.
-
+#
 # Critérios:
 # padj < 0.05
 # log2FoldChange <= -1
@@ -680,10 +677,10 @@ nrow(DEGs_up) + nrow(DEGs_down)
 ############################################################
 
 # Salvar os resultados em arquivos CSV.
-
+#
 # Os arquivos serão salvos no diretório de trabalho atual,
 # que pode ser consultado utilizando getwd().
-
+#
 # row.names = TRUE mantém os identificadores dos genes
 # que estão armazenados nos nomes das linhas.
 
@@ -696,22 +693,23 @@ write.csv(
 
 # Genes com expressão aumentada
 #write.csv(
-# DEGs_up,
-# "DEGs_up.csv",
-# row.names = TRUE
+ # DEGs_up,
+  #"DEGs_up.csv",
+  #row.names = TRUE
 #)
 
 # Genes com expressão reduzida
 #write.csv(
-# DEGs_down,
-# "DEGs_down.csv",
-# row.names = TRUE
+ # DEGs_down,
+  #"DEGs_down.csv",
+  #row.names = TRUE
 #)
 
 
 ############################################################
 # FIM DA ANÁLISE
 ############################################################
+
 ```
 A interpretação dos resultados considera principalmente:
 
